@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gravir.pro | Персонализирани Дървени Подаръци</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        gold: {
+                            50: '#faf8f3',
+                            100: '#f5f0e3',
+                            200: '#e8dcc4',
+                            300: '#d9c49e',
+                            400: '#c9a96f',
+                            500: '#b8954a',
+                            600: '#a67c3d',
+                            700: '#8a6333',
+                            800: '#70512d',
+                            900: '#5c4428',
+                        },
+                        charcoal: {
+                            900: '#0a0a0a',
+                            800: '#141414',
+                            700: '#1f1f1f',
+                            600: '#2a2a2a',
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Cormorant Garamond', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    animation: {
+                        'fade-in': 'fadeIn 1s ease-out',
+                        'fade-in-up': 'fadeInUp 1s ease-out',
+                        'float': 'float 6s ease-in-out infinite',
+                    },
+                    keyframes: {
+                        fadeIn: {
+                            '0%': { opacity: '0' },
+                            '100%': { opacity: '1' },
+                        },
+                        fadeInUp: {
+                            '0%': { opacity: '0', transform: 'translateY(30px)' },
+                            '100%': { opacity: '1', transform: 'translateY(0)' },
+                        },
+                        float: {
+                            '0%, 100%': { transform: 'translateY(0)' },
+                            '50%': { transform: 'translateY(-20px)' },
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #0a0a0a;
+        }
+        .font-serif {
+            font-family: 'Cormorant Garamond', serif;
+        }
+        .gold-gradient {
+            background: linear-gradient(135deg, #b8954a 0%, #e8dcc4 50%, #b8954a 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .gold-border {
+            border-image: linear-gradient(135deg, #b8954a, #e8dcc4, #b8954a) 1;
+        }
+        .luxury-shadow {
+            box-shadow: 0 25px 50px -12px rgba(184, 149, 74, 0.15);
+        }
+        .grain {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+            opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+        }
+    </style>
+</head>
+<body class="text-gray-300 antialiased">
+    <div class="grain"></div>
+    
+    <!-- Navigation -->
+    <nav class="fixed top-0 left-0 right-0 z-50 bg-charcoal-900/80 backdrop-blur-md border-b border-gold-500/10">
+        <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+            <a href="#" class="font-serif text-2xl font-semibold text-white tracking-wide">
+                <span class="gold-gradient">Gravir</span><span class="text-gold-500">.pro</span>
+            </a>
+            <div class="hidden md:flex items-center space-x-8 text-sm">
+                <a href="#products" class="hover:text-gold-400 transition-colors">Продукти</a>
+                <a href="#why" class="hover:text-gold-400 transition-colors">Защо ние</a>
+                <a href="#numbers" class="hover:text-gold-400 transition-colors">Числа</a>
+                <a href="#contact" class="px-5 py-2 bg-gold-500 text-charcoal-900 font-medium rounded-full hover:bg-gold-400 transition-all duration-300">
+                    Поръчай
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="min-h-screen flex items-center justify-center relative overflow-hidden">
+        <!-- Background Elements -->
+        <div class="absolute inset-0">
+            <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-gold-500/5 rounded-full blur-3xl"></div>
+            <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-gold-500/3 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div class="relative z-10 text-center px-6 max-w-5xl mx-auto">
+            <p class="text-gold-500 text-sm tracking-[0.3em] uppercase mb-6 animate-fade-in">
+                Персонализирани Дървени Подаръци
+            </p>
+            
+            <h1 class="font-serif text-5xl md:text-7xl lg:text-8xl font-light text-white mb-8 leading-tight animate-fade-in-up">
+                Подаръци, които <br/>
+                <span class="gold-gradient italic">разказват история</span>
+            </h1>
+            
+            <p class="text-lg md:text-xl text-gray-400 max-w-2xl mx-auto mb-12 leading-relaxed animate-fade-in-up" style="animation-delay: 0.2s">
+                Гравираме имена, послания и снимки върху дърво. За моменти, които няма да се повторят. Ръчна изработка в България.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center items-center animate-fade-in-up" style="animation-delay: 0.4s">
+                <a href="#products" class="px-8 py-4 bg-gold-500 text-charcoal-900 font-medium rounded-full hover:bg-gold-400 transition-all duration-300 luxury-shadow">
+                    Разгледай колекцията
+                </a>
+                <a href="#contact" class="px-8 py-4 border border-gold-500/30 text-gold-400 font-medium rounded-full hover:border-gold-500 hover:bg-gold-500/10 transition-all duration-300">
+                    Поръчай сега
+                </a>
+            </div>
+        </div>
+        
+        <!-- Scroll Indicator -->
+        <div class="absolute bottom-10 left-1/2 transform -translate-x-1/2 animate-float">
+            <div class="w-6 h-10 border-2 border-gold-500/30 rounded-full flex justify-center pt-2">
+                <div class="w-1 h-2 bg-gold-500 rounded-full animate-pulse"></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- What We Do -->
+    <section id="products" class="py-24 md:py-32 bg-charcoal-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <p class="text-gold-500 text-sm tracking-[0.3em] uppercase mb-4">Какво правим</p>
+                <h2 class="font-serif text-4xl md:text-5xl text-white mb-6">Творене на <span class="gold-gradient italic">спомени</span></h2>
+            </div>
+            
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Product 1 -->
+                <div class="group bg-charcoal-900 rounded-2xl overflow-hidden border border-gold-500/10 hover:border-gold-500/30 transition-all duration-500">
+                    <div class="aspect-square bg-gradient-to-br from-charcoal-700 to-charcoal-800 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gold-500/5 group-hover:bg-gold-500/10 transition-colors"></div>
+                        <span class="font-serif text-6xl text-gold-500/20 group-hover:scale-110 transition-transform duration-500">★</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-serif text-xl text-white mb-2">Сватбени Табели</h3>
+                        <p class="text-gray-400 text-sm mb-4">Персонални послания за най-важния ден</p>
+                        <span class="text-gold-500 font-medium">от €35</span>
+                    </div>
+                </div>
+                
+                <!-- Product 2 -->
+                <div class="group bg-charcoal-900 rounded-2xl overflow-hidden border border-gold-500/10 hover:border-gold-500/30 transition-all duration-500">
+                    <div class="aspect-square bg-gradient-to-br from-charcoal-700 to-charcoal-800 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gold-500/5 group-hover:bg-gold-500/10 transition-colors"></div>
+                        <span class="font-serif text-6xl text-gold-500/20 group-hover:scale-110 transition-transform duration-500">♥</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-serif text-xl text-white mb-2">Фотогравировки</h3>
+                        <p class="text-gray-400 text-sm mb-4">Снимки, превърнати в дървени произведения</p>
+                        <span class="text-gold-500 font-medium">от €30</span>
+                    </div>
+                </div>
+                
+                <!-- Product 3 -->
+                <div class="group bg-charcoal-900 rounded-2xl overflow-hidden border border-gold-500/10 hover:border-gold-500/30 transition-all duration-500">
+                    <div class="aspect-square bg-gradient-to-br from-charcoal-700 to-charcoal-800 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gold-500/5 group-hover:bg-gold-500/10 transition-colors"></div>
+                        <span class="font-serif text-6xl text-gold-500/20 group-hover:scale-110 transition-transform duration-500">♔</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-serif text-xl text-white mb-2">Именни Плочи</h3>
+                        <p class="text-gray-400 text-sm mb-4">За вратата или като специален подарък</p>
+                        <span class="text-gold-500 font-medium">от €15</span>
+                    </div>
+                </div>
+                
+                <!-- Product 4 -->
+                <div class="group bg-charcoal-900 rounded-2xl overflow-hidden border border-gold-500/10 hover:border-gold-500/30 transition-all duration-500">
+                    <div class="aspect-square bg-gradient-to-br from-charcoal-700 to-charcoal-800 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute inset-0 bg-gold-500/5 group-hover:bg-gold-500/10 transition-colors"></div>
+                        <span class="font-serif text-6xl text-gold-500/20 group-hover:scale-110 transition-transform duration-500">⚜</span>
+                    </div>
+                    <div class="p-6">
+                        <h3 class="font-serif text-xl text-white mb-2">Дъски за Рязане</h3>
+                        <p class="text-gray-400 text-sm mb-4">Функционално изкуство за всяка кухня</p>
+                        <span class="text-gold-500 font-medium">от €30</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Us -->
+    <section id="why" class="py-24 md:py-32 bg-charcoal-900 relative">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <p class="text-gold-500 text-sm tracking-[0.3em] uppercase mb-4">Защо ние</p>
+                    <h2 class="font-serif text-4xl md:text-5xl text-white mb-8">
+                        Разликата е в <span class="gold-gradient italic">детайлите</span>
+                    </h2>
+                    
+                    <div class="space-y-8">
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gold-500/10 flex items-center justify-center flex-shrink-0">
+                                <span class="text-gold-500 text-xl">⚡</span>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-medium mb-2">Бързина</h4>
+                                <p class="text-gray-400 text-sm">Правим за 24-48 часа. Другите чакат седмици.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gold-500/10 flex items-center justify-center flex-shrink-0">
+                                <span class="text-gold-500 text-xl">✦</span>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-medium mb-2">Качество</h4>
+                                <p class="text-gray-400 text-sm">Всяка буква е ясна. Вижда се разликата.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gold-500/10 flex items-center justify-center flex-shrink-0">
+                                <span class="text-gold-500 text-xl">♡</span>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-medium mb-2">Разбиране</h4>
+                                <p class="text-gray-400 text-sm">Питаме какво означава подаръкът за вас.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex gap-4">
+                            <div class="w-12 h-12 rounded-full bg-gold-500/10 flex items-center justify-center flex-shrink-0">
+                                <span class="text-gold-500 text-xl">◈</span>
+                            </div>
+                            <div>
+                                <h4 class="text-white font-medium mb-2">Лесно</h4>
+                                <p class="text-gray-400 text-sm">Качвате снимка или име — ние правим магията.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative">
+                    <div class="aspect-[4/5] bg-gradient-to-br from-charcoal-700 to-charcoal-800 rounded-2xl border border-gold-500/10 flex items-center justify-center">
+                        <span class="font-serif text-9xl text-gold-500/10">G</span>
+                    </div>
+                    <div class="absolute -bottom-6 -right-6 w-32 h-32 bg-gold-500 rounded-full blur-3xl opacity-20"></div>
+                    <div class="absolute -top-6 -left-6 w-32 h-32 bg-gold-500 rounded-full blur-3xl opacity-10"></div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- The Numbers -->
+    <section id="numbers" class="py-24 md:py-32 bg-charcoal-800">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="text-center mb-16">
+                <p class="text-gold-500 text-sm tracking-[0.3em] uppercase mb-4">Пътят ни</p>
+                <h2 class="font-serif text-4xl md:text-5xl text-white mb-6">Числата <span class="gold-gradient italic">говорят</span></h2>
+            </div>
+            
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="text-center p-8 border border-gold-500/10 rounded-2xl bg-charcoal-900/50">
+                    <div class="font-serif text-5xl md:text-6xl gold-gradient mb-2">€18K</div>
+                    <p class="text-gold-500 text-sm tracking-wider uppercase mb-2">Година 1</p>
+                    <p class="text-gray-400 text-sm">Доказване на модела в България</p>
+                </div>
+                
+                <div class="text-center p-8 border border-gold-500/10 rounded-2xl bg-charcoal-900/50 relative overflow-hidden">
+                    <div class="absolute inset-0 bg-gold-500/5"></div>
+                    <div class="relative">
+                        <div class="font-serif text-5xl md:text-6xl gold-gradient mb-2">€150K</div>
+                        <p class="text-gold-500 text-sm tracking-wider uppercase mb-2">Година 3</p>
+                        <p class="text-gray-400 text-sm">Румъния + Гърция + Германия</p>
+                    </div>
+                </div>
+                
+                <div class="text-center p-8 border border-gold-500/10 rounded-2xl bg-charcoal-900/50">
+                    <div class="font-serif text-5xl md:text-6xl gold-gradient mb-2">€1M</div>
+                    <p class="text-gold-500 text-sm tracking-wider uppercase mb-2">Година 5</p>
+                    <p class="text-gray-400 text-sm">Лидер в цяла Европа</p>
+                </div>
+            </div>
+            
+            <div class="mt-12 text-center">
+                <p class="text-gray-400 text-sm">Инвестиция: <span class="text-white font-medium">€20,000</span> → ROI: <span class="text-gold-400 font-medium">50x</span></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Why Now -->
+    <section class="py-24 md:py-32 bg-charcoal-900">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <p class="text-gold-500 text-sm tracking-[0.3em] uppercase mb-4">Защо сега</p>
+            <h2 class="font-serif text-4xl md:text-5xl text-white mb-12">
+                Пазарът е <span class="gold-gradient italic">готов</span>
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="p-6 bg-charcoal-800 rounded-xl border border-gold-500/10">
+                    <span class="text-3xl mb-4 block">€</span>
+                    <h4 class="text-white font-medium mb-2">България в Еврозоната</h4>
+                    <p class="text-gray-400 text-sm">От януари 2026 — единна валута, единен пазар</p>
+                </div>
+                
+                <div class="p-6 bg-charcoal-800 rounded-xl border border-gold-500/10">
+                    <span class="text-3xl mb-4 block">10%</span>
+                    <h4 class="text-white font-medium mb-2">Данък Печалба</h4>
+                    <p class="text-gray-400 text-sm">Най-ниският в Европейски съюз</p>
+                </div>
+                
+                <div class="p-6 bg-charcoal-800 rounded-xl border border-gold-500/10">
+                    <span class="text-3xl mb-4 block">$30B</span>
+                    <h4 class="text-white font-medium mb-2">Пазару на Подаръци</h4>
+                    <p class="text-gray-400 text-sm">Персонализираните подаръци растат с 8% годишно</p>
+                </div>
+                
+                <div class="p-6 bg-charcoal-800 rounded-xl border border-gold-500/10">
+                    <span class="text-3xl mb-4 block">☆☆☆☆☆</span>
+                    <h4 class="text-white font-medium mb-2">Няма Конкуренция</h4>
+                    <p class="text-gray-400 text-sm">В България няма качествен онлайн играч</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA -->
+    <section id="contact" class="py-24 md:py-32 bg-gradient-to-b from-charcoal-900 to-charcoal-800 relative overflow-hidden">
+        <div class="absolute inset-0">
+            <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-gold-500/10 rounded-full blur-3xl"></div>
+        </div>
+        
+        <div class="max-w-3xl mx-auto px-6 text-center relative z-10">
+            <p class="text-gold-500 text-sm tracking-[0.3em] uppercase mb-4">Започни сега</p>
+            <h2 class="font-serif text-4xl md:text-6xl text-white mb-6">
+                Нека разкажем <span class="gold-gradient italic">твоята история</span>
+            </h2>
+            <p class="text-gray-400 mb-10 max-w-xl mx-auto">
+                Всеки подарък разказва история. Ние помагаме на хората да разкажат тяхната. 
+                Ръчна изработка в България с внимание към всеки детайл.
+            </p>
+            
+            <div class="flex flex-col sm:flex-row gap-4 justify-center">
+                <a href="mailto:hello@gravir.pro" class="px-10 py-4 bg-gold-500 text-charcoal-900 font-medium rounded-full hover:bg-gold-400 transition-all duration-300 luxury-shadow inline-flex items-center justify-center">
+                    <span>Свържи се с нас</span>
+                    <span class="ml-2">→</span>
+                </a>
+                <span class="text-gray-500 text-sm py-4">или ни пишете на hello@gravir.pro</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="py-12 bg-charcoal-900 border-t border-gold-500/10">
+        <div class="max-w-7xl mx-auto px-6">
+            <div class="flex flex-col md:flex-row justify-between items-center">
+                <div class="mb-6 md:mb-0">
+                    <a href="#" class="font-serif text-2xl font-semibold text-white tracking-wide">
+                        <span class="gold-gradient">Gravir</span><span class="text-gold-500">.pro</span>
+                    </a>
+                    <p class="text-gray-500 text-sm mt-2">Персонализирани дървени подаръци</p>
+                </div>
+                
+                <div class="flex items-center gap-8 text-sm text-gray-400">
+                    <a href="#" class="hover:text-gold-400 transition-colors">Продукти</a>
+                    <a href="#" class="hover:text-gold-400 transition-colors">За нас</a>
+                    <a href="#" class="hover:text-gold-400 transition-colors">Контакти</a>
+                </div>
+            </div>
+            
+            <div class="mt-8 pt-8 border-t border-charcoal-800 text-center text-gray-500 text-sm">
+                <p>© 2026 Gravir.pro — Всички права запазени. Ръчна изработка в България.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Intersection Observer for animations
+        const observerOptions = {
+            threshold: 0.1,
+            rootMargin: '0px 0px -50px 0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('animate-fade-in-up');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section > div').forEach(el => {
+            observer.observe(el);
+        });
+    </script>
+</body>
+</html>
