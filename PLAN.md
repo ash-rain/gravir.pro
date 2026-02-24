@@ -2,7 +2,7 @@
 
 ## Overview
 
-Build a luxurious e-commerce store for personalized wooden gifts. Simple but beautiful.
+Build a luxurious e-commerce store for personalized wooden gifts. Multi-language from the start.
 
 ---
 
@@ -15,13 +15,12 @@ Build a luxurious e-commerce store for personalized wooden gifts. Simple but bea
 4. Payment: Cash on Delivery + Bank Transfer + PayPal
 5. Email confirmation
 6. Filament admin panel
+7. **Multi-language (EN, BG default + EU languages)**
 
 ### What We Don't Need Now
 - User accounts (optional via Breeze)
 - Reviews
 - Order tracking
-- Multi-language (keep it for later)
-- Complex design tool
 
 ---
 
@@ -29,6 +28,7 @@ Build a luxurious e-commerce store for personalized wooden gifts. Simple but bea
 
 ```
 /                      → Home (luxury)
+/{locale}/             → Home localized (en, bg, de, fr, es, it, ro, gr)
 /products              → Products
 /product/{slug}       → Product detail
 /cart                 → Cart
@@ -52,6 +52,7 @@ Schema::create('users', function (Blueprint $table) {
     $table->text('address')->nullable();
     $table->string('city', 100)->nullable();
     $table->boolean('is_admin')->default(false);
+    $table->string('locale')->default('bg'); // Default language
     $table->timestamp('email_verified_at')->nullable();
     $table->string('password');
     $table->rememberToken();
@@ -60,9 +61,9 @@ Schema::create('users', function (Blueprint $table) {
 
 Schema::create('categories', function (Blueprint $table) {
     $table->id();
-    $table->string('name');
+    $table->string('name'); // JSON: {'en': 'Wedding', 'bg': 'Сватбени'}
     $table->string('slug')->unique();
-    $table->text('description')->nullable();
+    $table->text('description'); // JSON translations
     $table->string('image')->nullable();
     $table->timestamps();
 });
@@ -70,9 +71,9 @@ Schema::create('categories', function (Blueprint $table) {
 Schema::create('products', function (Blueprint $table) {
     $table->id();
     $table->foreignId('category_id')->constrained();
-    $table->string('name');
+    $table->string('name'); // JSON: {'en': 'Name', 'bg': 'Име'}
     $table->string('slug')->unique();
-    $table->text('description');
+    $table->text('description'); // JSON translations
     $table->decimal('price', 10, 2);
     $table->string('image');
     $table->json('images')->nullable();
@@ -95,6 +96,7 @@ Schema::create('orders', function (Blueprint $table) {
     $table->enum('status', ['new', 'confirmed', 'processing', 'ready', 'shipped', 'delivered', 'cancelled'])->default('new');
     $table->text('notes')->nullable();
     $table->string('tracking_number')->nullable();
+    $table->string('locale')->default('bg'); // Order language
     $table->timestamps();
 });
 
@@ -111,7 +113,595 @@ Schema::create('order_items', function (Blueprint $table) {
 
 ---
 
-## Docker Setup (Simplified)
+## Multi-Language Strategy
+
+### Supported Languages
+| Code | Language | Default |
+|------|----------|---------|
+| bg | Bulgarian | ✅ Yes |
+| en | English | |
+| de | German | |
+| fr | French | |
+| es | Spanish | |
+| it | Italian | |
+| ro | Romanian | |
+| gr | Greek | |
+
+### Implementation
+- **URL Structure**: `gravir.pro/bg/products`, `gravir.pro/en/products`
+- **Default**: Bulgarian (`bg`)
+- **Storage**: JSON fields in database for translations
+- **Fallback**: If translation missing → show Bulgarian
+
+### Language Switcher
+```php
+// In layout
+<select onchange="window.location.href='/' + this.value">
+    <option value="bg" {{ request()->locale() == 'bg' ? 'selected' : '' }}>Български</option>
+    <option value="en" {{ request()->locale() == 'en' ? 'selected' : '' }}>English</option>
+    <option value="de" {{ request()->locale() == 'de' ? 'selected' : '' }}>Deutsch</option>
+    <option value="fr" {{ request()->locale() == 'fr' ? 'selected' : '' }}>Français</option>
+    <option value="es" {{ request()->locale() == 'es' ? 'selected' : '' }}>Español</option>
+    <option value="it" {{ request()->locale() == 'it' ? 'selected' : '' }}>Italiano</option>
+    <option value="ro" {{ request()->locale() == 'ro' ? 'selected' : '' }}>Română</option>
+    <option value="gr" {{ request()->locale() == 'gr' ? 'selected' : '' }}>Ελληνικά</option>
+</select>
+```
+
+---
+
+## Translations Helper
+
+```php
+// app/Helpers/Translatable.php
+<?php
+
+function trans_field($field, ?string $locale = null): string
+{
+    $locale = $locale ?? app()->getLocale();
+    $data = json_decode($field, true);
+    
+    if (!$data) return $field;
+    
+    return $data[$locale] ?? $data['bg'] ?? $field;
+}
+```
+
+```php
+// Usage in Blade
+<h1>{{ trans_field($product->name) }}</h1>
+<p>{{ trans_field($product->description) }}</p>
+```
+
+---
+
+## Language Files (lang/)
+
+```php
+// lang/bg/messages.php
+<?php
+
+return [
+    // Navigation
+    'home' => 'Начало',
+    'products' => 'Продукти',
+    'cart' => 'Кошница',
+    'checkout' => 'Поръчка',
+    'about' => 'За нас',
+    'contact' => 'Контакти',
+    
+    // Checkout
+    'name' => 'Име',
+    'phone' => 'Телефон',
+    'address' => 'Адрес',
+    'city' => 'Град',
+    'notes' => 'Бележки',
+    'submit_order' => 'Поръчай',
+    
+    // Payment
+    'payment_method' => 'Начин на плащане',
+    'bank_transfer' => 'Банков превод',
+    'cash_on_delivery' => 'Наложен платеж',
+    'paypal' => 'PayPal',
+    
+    // Status
+    'status_new' => 'Нова',
+    'status_confirmed' => 'Потвърдена',
+    'status_processing' => 'В обработка',
+    'status_ready' => 'Готова',
+    'status_shipped' => 'Пратена',
+    'status_delivered' => 'Доставена',
+    'status_cancelled' => 'Отказана',
+    
+    // Cart
+    'cart_empty' => 'Кошницата е празна',
+    'add_to_cart' => 'Добави в кошница',
+    'remove' => 'Премахни',
+    'quantity' => 'Количество',
+    'subtotal' => 'Междинна сума',
+    'shipping' => 'Доставка',
+    'total' => 'Общо',
+    'free_shipping' => 'Безплатна доставка над €50',
+    
+    // Products
+    'from' => 'от',
+    'in_stock' => 'В наличност',
+    'out_of_stock' => 'Изчерпано',
+    
+    // General
+    'thank_you' => 'Благодарим!',
+    'order_received' => 'Поръчката е приета.',
+    'we_will_contact' => 'Ще се свържем с вас скоро.',
+    
+    // Footer
+    'all_rights_reserved' => 'Всички права запазени.',
+    'made_in_bulgaria' => 'Ръчна изработка в България.',
+];
+```
+
+```php
+// lang/en/messages.php
+<?php
+
+return [
+    // Navigation
+    'home' => 'Home',
+    'products' => 'Products',
+    'cart' => 'Cart',
+    'checkout' => 'Checkout',
+    'about' => 'About',
+    'contact' => 'Contact',
+    
+    // Checkout
+    'name' => 'Name',
+    'phone' => 'Phone',
+    'address' => 'Address',
+    'city' => 'City',
+    'notes' => 'Notes',
+    'submit_order' => 'Order Now',
+    
+    // Payment
+    'payment_method' => 'Payment Method',
+    'bank_transfer' => 'Bank Transfer',
+    'cash_on_delivery' => 'Cash on Delivery',
+    'paypal' => 'PayPal',
+    
+    // Status
+    'status_new' => 'New',
+    'status_confirmed' => 'Confirmed',
+    'status_processing' => 'Processing',
+    'status_ready' => 'Ready',
+    'status_shipped' => 'Shipped',
+    'status_delivered' => 'Delivered',
+    'status_cancelled' => 'Cancelled',
+    
+    // Cart
+    'cart_empty' => 'Your cart is empty',
+    'add_to_cart' => 'Add to Cart',
+    'remove' => 'Remove',
+    'quantity' => 'Quantity',
+    'subtotal' => 'Subtotal',
+    'shipping' => 'Shipping',
+    'total' => 'Total',
+    'free_shipping' => 'Free shipping over €50',
+    
+    // Products
+    'from' => 'from',
+    'in_stock' => 'In Stock',
+    'out_of_stock' => 'Out of Stock',
+    
+    // General
+    'thank_you' => 'Thank You!',
+    'order_received' => 'Your order has been received.',
+    'we_will_contact' => 'We will contact you soon.',
+    
+    // Footer
+    'all_rights_reserved' => 'All rights reserved.',
+    'made_in_bulgaria' => 'Handmade in Bulgaria.',
+];
+```
+
+```php
+// lang/de/messages.php
+<?php
+
+return [
+    'home' => 'Startseite',
+    'products' => 'Produkte',
+    'cart' => 'Warenkorb',
+    'checkout' => 'Kasse',
+    'payment_method' => 'Zahlungsmethode',
+    'bank_transfer' => 'Überweisung',
+    'cash_on_delivery' => 'Nachnahme',
+    'paypal' => 'PayPal',
+    'total' => 'Gesamt',
+    'from' => 'ab',
+];
+```
+
+```php
+// lang/fr/messages.php
+<?php
+
+return [
+    'home' => 'Accueil',
+    'products' => 'Produits',
+    'cart' => 'Panier',
+    'checkout' => 'Commander',
+    'payment_method' => 'Mode de paiement',
+    'bank_transfer' => 'Virement bancaire',
+    'cash_on_delivery' => 'Contre remboursement',
+    'paypal' => 'PayPal',
+    'total' => 'Total',
+    'from' => 'à partir de',
+];
+```
+
+```php
+// lang/es/messages.php
+<?php
+
+return [
+    'home' => 'Inicio',
+    'products' => 'Productos',
+    'cart' => 'Carrito',
+    'checkout' => 'Pagar',
+    'payment_method' => 'Método de pago',
+    'bank_transfer' => 'Transferencia bancaria',
+    'cash_on_delivery' => 'Contra reembolso',
+    'paypal' => 'PayPal',
+    'total' => 'Total',
+    'from' => 'desde',
+];
+```
+
+```php
+// lang/it/messages.php
+<?php
+
+return [
+    'home' => 'Home',
+    'products' => 'Prodotti',
+    'cart' => 'Carrello',
+    'checkout' => 'Checkout',
+    'payment_method' => 'Metodo di pagamento',
+    'bank_transfer' => 'Bonifico bancario',
+    'cash_on_delivery' => 'Contrassegno',
+    'paypal' => 'PayPal',
+    'total' => 'Totale',
+    'from' => 'da',
+];
+```
+
+```php
+// lang/ro/messages.php
+<?php
+
+return [
+    'home' => 'Acasă',
+    'products' => 'Produse',
+    'cart' => 'Coș',
+    'checkout' => 'Comandă',
+    'payment_method' => 'Metoda de plată',
+    'bank_transfer' => 'Transfer bancar',
+    'cash_on_delivery' => 'Ramburs',
+    'paypal' => 'PayPal',
+    'total' => 'Total',
+    'from' => 'de la',
+];
+```
+
+```php
+// lang/gr/messages.php
+<?php
+
+return [
+    'home' => 'Αρχική',
+    'products' => 'Προϊόντα',
+    'cart' => 'Καλάθι',
+    'checkout' => 'Ολοκλήρωση',
+    'payment_method' => 'Μέθοδος πληρωμής',
+    'bank_transfer' => 'Τραπεζική μεταφορά',
+    'cash_on_delivery' => 'Αντικαταβολή',
+    'paypal' => 'PayPal',
+    'total' => 'Σύνολο',
+    'from' => 'από',
+];
+```
+
+---
+
+## Demo Seeder — Full Multi-Language Data
+
+```php
+// database/seeders/DatabaseSeeder.php
+<?php
+
+namespace Database\Seeders;
+
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
+
+class DatabaseSeeder extends Seeder
+{
+    public function run(): void
+    {
+        // Categories - Multi-language
+        $categories = [
+            [
+                'name' => json_encode([
+                    'bg' => 'Сватбени Подаръци',
+                    'en' => 'Wedding Gifts',
+                    'de' => 'Hochzeitsgeschenke',
+                    'fr' => 'Cadeaux de mariage',
+                    'es' => 'Regalos de boda',
+                    'it' => 'Regali di nozze',
+                    'ro' => 'Cadouiri de nuntă',
+                    'gr' => 'Δώρα γάμου',
+                ]),
+                'slug' => 'wedding-gifts',
+                'description' => json_encode([
+                    'bg' => 'Персонални спомени за най-важния ден',
+                    'en' => 'Personalized keepsakes for your special day',
+                    'de' => 'Persönliche Andenken für Ihren großen Tag',
+                    'fr' => 'Souvenirs personnalisés pour votre grand jour',
+                    'es' => 'Recuerdos personalizados para tu gran día',
+                    'it' => 'Ricordi personalizzati per il tuo grande giorno',
+                    'ro' => 'Amintiri personalizate pentru ziua ta specială',
+                    'gr' => 'Εξατομικευμένα αναμνηστικά για τη μεγάλη σου μέρα',
+                ]),
+                'image' => 'categories/wedding.jpg',
+            ],
+            [
+                'name' => json_encode([
+                    'bg' => 'Именни Табели',
+                    'en' => 'Name Plates',
+                    'de' => 'Namensschilder',
+                    'fr' => 'Plaques nominatives',
+                    'es' => 'Placas con nombre',
+                    'it' => 'Targhe con nome',
+                    'ro' => 'Plăcuțe cu nume',
+                    'gr' => 'Πινακίδες ονόματος',
+                ]),
+                'slug' => 'name-plates',
+                'description' => json_encode([
+                    'bg' => 'За вратата или като специален подарък',
+                    'en' => 'For doors or as a special gift',
+                    'de' => 'Für Türen oder als besonderes Geschenk',
+                    'fr' => 'Pour les portes ou comme cadeau spécial',
+                    'es' => 'Para puertas o como regalo especial',
+                    'it' => 'Per porte o come regalo speciale',
+                    'ro' => 'Pentru uși sau ca cadou special',
+                    'gr' => 'Για πόρτες ή ως ειδικό δώρο',
+                ]),
+                'image' => 'categories/plates.jpg',
+            ],
+            [
+                'name' => json_encode([
+                    'bg' => 'Фотогравировки',
+                    'en' => 'Photo Engravings',
+                    'de' => 'Fotogravuren',
+                    'fr' => 'Gravures photo',
+                    'es' => 'Grabados foto',
+                    'it' => 'Incisioni foto',
+                    'ro' => 'Gravuri foto',
+                    'gr' => 'Φωτογραφίες χάραξης',
+                ]),
+                'slug' => 'photo-engravings',
+                'description' => json_encode([
+                    'bg' => 'Снимки, превърнати в дървени произведения',
+                    'en' => 'Photos transformed into wooden art',
+                    'de' => 'Fotos in Holz Kunst verwandelt',
+                    'fr' => 'Photos transformées en art bois',
+                    'es' => 'Fotos transformadas en arte de madera',
+                    'it' => 'Foto trasformate in arte legno',
+                    'ro' => 'Fotografii transformate în artă din lemn',
+                    'gr' => 'Φωτογραφίες μετατρέπονται σε ξύλινη τέχνη',
+                ]),
+                'image' => 'categories/photos.jpg',
+            ],
+            [
+                'name' => json_encode([
+                    'bg' => 'Домашен Декор',
+                    'en' => 'Home Decor',
+                    'de' => 'Wohndekoration',
+                    'fr' => 'Décoration maison',
+                    'es' => 'Decoración del hogar',
+                    'it' => 'Arredamento casa',
+                    'ro' => 'Decor locuință',
+                    'gr' => 'Διακόσμηση σπιτιού',
+                ]),
+                'slug' => 'home-decor',
+                'description' => json_encode([
+                    'bg' => 'Функционално изкуство за вашия дом',
+                    'en' => 'Functional art for your home',
+                    'de' => 'Funktionelle Kunst für Ihr Zuhause',
+                    'fr' => 'Art fonctionnel pour votre maison',
+                    'es' => 'Arte funcional para tu hogar',
+                    'it' => 'Arte funzionale per la tua casa',
+                    'ro' => 'Artă funcțională pentru casa ta',
+                    'gr' => 'Λειτουργική τέχνη για το σπίτι σου',
+                ]),
+                'image' => 'categories/decor.jpg',
+            ],
+            [
+                'name' => json_encode([
+                    'bg' => 'Корпоративни',
+                    'en' => 'Corporate',
+                    'de' => 'Unternehmen',
+                    'fr' => 'Entreprise',
+                    'es' => 'Corporativo',
+                    'it' => 'Aziendale',
+                    'ro' => 'Corporativ',
+                    'gr' => 'Εταιρικά',
+                ]),
+                'slug' => 'corporate',
+                'description' => json_encode([
+                    'bg' => 'Професионални подаръци за бизнеса',
+                    'en' => 'Professional gifts for business',
+                    'de' => 'Professionelle Geschenke für Unternehmen',
+                    'fr' => 'Cadeaux professionnels pour les entreprises',
+                    'es' => 'Regalos profesionales para negocios',
+                    'it' => 'Regali professionali per aziende',
+                    'ro' => 'Cadouiri profesionale pentru afaceri',
+                    'gr' => 'Επαγγελματικά δώρα για επιχειρήσεις',
+                ]),
+                'image' => 'categories/corporate.jpg',
+            ],
+        ];
+
+        foreach ($categories as $cat) {
+            DB::table('categories')->insert([...$cat, 'created_at' => now(), 'updated_at' => now()]);
+        }
+
+        // Products - Multi-language
+        $products = [
+            // Wedding
+            [
+                'category_id' => 1,
+                'name' => json_encode(['bg' => 'Сватбена Табела "Заедно"', 'en' => 'Wedding Plaque "Together"', 'de' => 'Hochzeitsschild "Zusammen"']),
+                'slug' => 'wedding-plaque-together',
+                'description' => json_encode(['bg' => 'Романтична сватбена табела с имената на двойката и датата.', 'en' => 'Romantic wedding plaque with couple names and date.', 'de' => 'Romantisches Hochzeitsschild mit Namen und Datum.']),
+                'price' => 45.00,
+                'image' => 'products/wedding-plaque-1.jpg',
+                'stock' => 50,
+            ],
+            [
+                'category_id' => 1,
+                'name' => json_encode(['bg' => 'Дървена Кутия за Пръстени', 'en' => 'Wooden Ring Box', 'de' => 'Holzringdose']),
+                'slug' => 'wooden-ring-box',
+                'description' => json_encode(['bg' => 'Елегантна дървена кутия за сватбените пръстени.', 'en' => 'Elegant wooden box for wedding rings.', 'de' => 'Elegante Holzkiste für Trauringe.']),
+                'price' => 35.00,
+                'image' => 'products/ring-box.jpg',
+                'stock' => 30,
+            ],
+            [
+                'category_id' => 1,
+                'name' => json_encode(['bg' => 'Сватбена Дъска за рязане', 'en' => 'Wedding Cutting Board', 'de' => 'Hochzeits Schneidebrett']),
+                'slug' => 'wedding-cutting-board',
+                'description' => json_encode(['bg' => 'Персонална дъска с гравирани имена и монограм.', 'en' => 'Personalized board with engraved names and monogram.', 'de' => 'Personalisierte Tafel mit gravierten Namen und Monogramm.']),
+                'price' => 40.00,
+                'image' => 'products/wedding-board.jpg',
+                'stock' => 40,
+            ],
+            
+            // Name Plates
+            [
+                'category_id' => 2,
+                'name' => json_encode(['bg' => 'Именна Табела "Класика"', 'en' => 'Name Plate "Classic"', 'de' => 'Namensschild "Klassik"']),
+                'slug' => 'name-plate-classic',
+                'description' => json_encode(['bg' => 'Елегантна именна табела за вратата.', 'en' => 'Elegant name plate for your door.', 'de' => 'Elegantes Namensschild für Ihre Tür.']),
+                'price' => 18.00,
+                'image' => 'products/name-plate-1.jpg',
+                'stock' => 100,
+            ],
+            [
+                'category_id' => 2,
+                'name' => json_encode(['bg' => 'Именна Табела "Модерна"', 'en' => 'Name Plate "Modern"', 'de' => 'Namensschild "Modern"']),
+                'slug' => 'name-plate-modern',
+                'description' => json_encode(['bg' => 'Модерна именна табела с минималистичен дизайн.', 'en' => 'Modern name plate with minimalist design.', 'de' => 'Modernes Namensschild mit minimalistischem Design.']),
+                'price' => 22.00,
+                'image' => 'products/name-plate-modern.jpg',
+                'stock' => 80,
+            ],
+            
+            // Photo Engravings
+            [
+                'category_id' => 3,
+                'name' => json_encode(['bg' => 'Фотогравировка "Спомен"', 'en' => 'Photo Engraving "Memory"', 'de' => 'Fotogravur "Erinnerung"']),
+                'slug' => 'photo-engraving-memory',
+                'description' => json_encode(['bg' => 'Преобразувайте любима снимка в дървена гравировка.', 'en' => 'Transform your favorite photo into wooden art.', 'de' => 'Verwandeln Sie Ihr Lieblingsfoto in Holzgravur.']),
+                'price' => 45.00,
+                'image' => 'products/photo-1.jpg',
+                'stock' => 40,
+            ],
+            [
+                'category_id' => 3,
+                'name' => json_encode(['bg' => 'Фотогравировка Домашен Любимец', 'en' => 'Pet Portrait', 'de' => 'Tierporträt']),
+                'slug' => 'pet-portrait',
+                'description' => json_encode(['bg' => 'Превърнете снимката на вашия любимец в трайно дървено изкуство.', 'en' => 'Turn your pet photo into lasting wood art.', 'de' => 'Verwandeln Sie Ihr Haustierfoto in dauerhafte Holzkunst.']),
+                'price' => 35.00,
+                'image' => 'products/pet-portrait.jpg',
+                'stock' => 50,
+            ],
+            
+            // Home Decor
+            [
+                'category_id' => 4,
+                'name' => json_encode(['bg' => 'Дъска за рязане "Шеф"', 'en' => 'Cutting Board "Chef"', 'de' => 'Schneidebrett "Koch"']),
+                'slug' => 'cutting-board-chef',
+                'description' => json_encode(['bg' => 'Професионална дъска с гравирана рецепта.', 'en' => 'Professional board with engraved recipe.', 'de' => 'Professionelles Brett mit graviertem Rezept.']),
+                'price' => 35.00,
+                'image' => 'products/cutting-board-1.jpg',
+                'stock' => 45,
+            ],
+            [
+                'category_id' => 4,
+                'name' => json_encode(['bg' => 'Комплект Подложки (4бр)', 'en' => 'Coaster Set (4pc)', 'de' => 'Untersetzer Set (4St)']),
+                'slug' => 'coaster-set-4',
+                'description' => json_encode(['bg' => 'Елегантен комплект от 4 дървени подложки.', 'en' => 'Elegant set of 4 wooden coasters.', 'de' => 'Elegantes Set aus 4 Holzuntersetzer.']),
+                'price' => 22.00,
+                'image' => 'products/coaster-set.jpg',
+                'stock' => 100,
+            ],
+            
+            // Corporate
+            [
+                'category_id' => 5,
+                'name' => json_encode(['bg' => 'Награда "Първенец"', 'en' => 'Award "Champion"', 'de' => 'Preis "Champion"']),
+                'slug' => 'award-first',
+                'description' => json_encode(['bg' => 'Персонална дървена награда за служители.', 'en' => 'Personalized wooden award for employees.', 'de' => 'Personalisierte Holzauszeichnung für Mitarbeiter.']),
+                'price' => 40.00,
+                'image' => 'products/award-1.jpg',
+                'stock' => 30,
+            ],
+        ];
+
+        foreach ($products as $product) {
+            DB::table('products')->insert([
+                ...$product,
+                'is_active' => true,
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+
+        // Admin User
+        DB::table('users')->insert([
+            'name' => 'Admin',
+            'email' => 'admin@gravir.pro',
+            'phone' => '+359888123456',
+            'locale' => 'bg',
+            'is_admin' => true,
+            'password' => bcrypt('admin123'),
+            'created_at' => now(),
+            'updated_at' => now(),
+        ]);
+
+        // Demo Orders
+        $orders = [
+            ['name' => 'Maria Petrova', 'phone' => '+359888111222', 'address' => '15 Gradinska St', 'city' => 'Sofia', 'payment_method' => 'cash_on_delivery', 'subtotal' => 45.00, 'shipping' => 5.00, 'total' => 50.00, 'status' => 'processing', 'locale' => 'bg'],
+            ['name' => 'Ivan Georgiev', 'phone' => '+359887333444', 'address' => '78 Vitosha Blvd', 'city' => 'Sofia', 'payment_method' => 'bank_transfer', 'subtotal' => 80.00, 'shipping' => 0.00, 'total' => 80.00, 'status' => 'confirmed', 'locale' => 'en'],
+        ];
+
+        foreach ($orders as $order) {
+            $orderId = DB::table('orders')->insertGetId([...$order, 'created_at' => now(), 'updated_at' => now()]);
+            DB::table('order_items')->insert([
+                'order_id' => $orderId,
+                'product_id' => rand(1, 5),
+                'quantity' => rand(1, 2),
+                'price' => rand(15, 45),
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+        }
+    }
+}
+```
+
+---
+
+## Docker Setup
 
 ```yaml
 # docker-compose.yml
@@ -147,15 +737,7 @@ services:
 FROM php:8.5-cli
 
 RUN apt-get update && apt-get install -y \
-    git \
-    curl \
-    libpng-dev \
-    oniguruma-dev \
-    libxml2-dev \
-    zip \
-    unzip \
-    libsqlite3-dev \
-    sqlite3
+    git curl libpng-dev oniguruma-dev libxml2-dev zip unzip libsqlite3-dev sqlite3
 
 RUN docker-php-ext-install pdo_sqlite mbstring exif pcntl
 
@@ -175,55 +757,26 @@ CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
 
 ---
 
-## Structure
-
-```
-app/
-├── Filament/
-│   └── Pages/
-│       └── Dashboard.php
-├── Http/
-│   ├── Controllers/
-│   │   ├── HomeController.php
-│   │   ├── ProductController.php
-│   │   └── CheckoutController.php
-│   └── Livewire/
-│       ├── Cart.php
-│       └── Checkout.php
-├── Models/
-│   ├── Product.php
-│   ├── Category.php
-│   ├── Order.php
-│   └── OrderItem.php
-├── Providers/
-│   └── AppServiceProvider.php
-└── View/
-    └── Components/
-```
-
----
-
 ## Step by Step
 
 ### Week 1: Foundation
 - [ ] Laravel project with Docker
 - [ ] Database migrations (SQLite)
-- [ ] Models (Product, Category, Order)
+- [ ] Multi-language setup (URL prefix)
+- [ ] Models with JSON translations
 - [ ] Install Filament + Breeze
-- [ ] Admin panel
-- [ ] Home page (luxury design)
 
 ### Week 2: Products
-- [ ] Product listing
-- [ ] Product page
-- [ ] Image upload
-- [ ] Seed data
+- [ ] Product listing (localized)
+- [ ] Product page (localized)
+- [ ] Seed with translations
+- [ ] Language switcher
 
 ### Week 3: Cart + Checkout
 - [ ] Cart (Livewire)
-- [ ] Checkout form
+- [ ] Checkout form (localized)
 - [ ] Payment: COD, Bank Transfer, PayPal
-- [ ] Save to database
+- [ ] Save to database with locale
 
 ### Week 4: Admin + Launch
 - [ ] Order management in Filament
@@ -233,143 +786,17 @@ app/
 
 ---
 
-## Demo Seeder — Full Demo Data
-
-```php
-// database/seeders/DatabaseSeeder.php
-<?php
-
-namespace Database\Seeders;
-
-use Illuminate\Database\Seeder;
-use Illuminate\Support\Facades\DB;
-
-class DatabaseSeeder extends Seeder
-{
-    public function run(): void
-    {
-        // Categories
-        $categories = [
-            ['name' => 'Wedding Gifts', 'slug' => 'wedding-gifts', 'description' => 'Personalized keepsakes for your special day', 'image' => 'categories/wedding.jpg'],
-            ['name' => 'Name Plates', 'slug' => 'name-plates', 'description' => 'For doors or as a special gift', 'image' => 'categories/plates.jpg'],
-            ['name' => 'Photo Engravings', 'slug' => 'photo-engravings', 'description' => 'Photos transformed into wooden art', 'image' => 'categories/photos.jpg'],
-            ['name' => 'Home Decor', 'slug' => 'home-decor', 'description' => 'Functional art for your home', 'image' => 'categories/decor.jpg'],
-            ['name' => 'Corporate', 'slug' => 'corporate', 'description' => 'Professional gifts for business', 'image' => 'categories/corporate.jpg'],
-        ];
-
-        foreach ($categories as $cat) {
-            DB::table('categories')->insert([...$cat, 'created_at' => now(), 'updated_at' => now()]);
-        }
-
-        // Products - 15 products
-        $products = [
-            // Wedding
-            ['category_id' => 1, 'name' => 'Wedding Plaque "Together"', 'slug' => 'wedding-plaque-together', 'description' => 'Romantic wedding plaque with couple names and date.', 'price' => 45.00, 'image' => 'products/wedding-plaque-1.jpg', 'stock' => 50],
-            ['category_id' => 1, 'name' => 'Wooden Ring Box', 'slug' => 'wooden-ring-box', 'description' => 'Elegant wooden box for wedding rings.', 'price' => 35.00, 'image' => 'products/ring-box.jpg', 'stock' => 30],
-            ['category_id' => 1, 'name' => 'Wedding Cutting Board', 'slug' => 'wedding-cutting-board', 'description' => 'Personalized board with names and monogram.', 'price' => 40.00, 'image' => 'products/wedding-board.jpg', 'stock' => 40],
-            
-            // Name Plates
-            ['category_id' => 2, 'name' => 'Name Plate "Classic"', 'slug' => 'name-plate-classic', 'description' => 'Elegant name plate for your door.', 'price' => 18.00, 'image' => 'products/name-plate-1.jpg', 'stock' => 100],
-            ['category_id' => 2, 'name' => 'Name Plate "Modern"', 'slug' => 'name-plate-modern', 'description' => 'Modern name plate with minimalist design.', 'price' => 22.00, 'image' => 'products/name-plate-modern.jpg', 'stock' => 80],
-            ['category_id' => 2, 'name' => 'Kids Room Sign', 'slug' => 'kids-room-sign', 'description' => 'Fun sign for kids room.', 'price' => 15.00, 'image' => 'products/kids-sign.jpg', 'stock' => 60],
-            
-            // Photo Engravings
-            ['category_id' => 3, 'name' => 'Photo Engraving "Memory"', 'slug' => 'photo-engraving-memory', 'description' => 'Transform your favorite photo into wooden art.', 'price' => 45.00, 'image' => 'products/photo-1.jpg', 'stock' => 40],
-            ['category_id' => 3, 'name' => 'Pet Portrait', 'slug' => 'pet-portrait', 'description' => 'Turn your pet photo into lasting wood art.', 'price' => 35.00, 'image' => 'products/pet-portrait.jpg', 'stock' => 50],
-            ['category_id' => 3, 'name' => 'Photo Coaster Set (4pc)', 'slug' => 'photo-coaster-set', 'description' => 'Set of 4 coasters with engraved photos.', 'price' => 30.00, 'image' => 'products/photo-coasters.jpg', 'stock' => 70],
-            
-            // Home Decor
-            ['category_id' => 4, 'name' => 'Cutting Board "Chef"', 'slug' => 'cutting-board-chef', 'description' => 'Professional board with engraved recipe.', 'price' => 35.00, 'image' => 'products/cutting-board-1.jpg', 'stock' => 45],
-            ['category_id' => 4, 'name' => 'Coaster Set (4pc)', 'slug' => 'coaster-set-4', 'description' => 'Elegant set of 4 wooden coasters.', 'price' => 22.00, 'image' => 'products/coaster-set.jpg', 'stock' => 100],
-            ['category_id' => 4, 'name' => 'Phone Stand', 'slug' => 'phone-stand', 'description' => 'Stylish phone stand in wood.', 'price' => 18.00, 'image' => 'products/phone-stand.jpg', 'stock' => 80],
-            
-            // Corporate
-            ['category_id' => 5, 'name' => 'Award "Champion"', 'slug' => 'award-first', 'description' => 'Personalized wooden award for employees.', 'price' => 40.00, 'image' => 'products/award-1.jpg', 'stock' => 30],
-            ['category_id' => 5, 'name' => 'Business Gift Set', 'slug' => 'business-gift-set', 'description' => 'Set with company logo.', 'price' => 60.00, 'image' => 'products/business-set.jpg', 'stock' => 25],
-            ['category_id' => 5, 'name' => 'Office Sign', 'slug' => 'office-sign', 'description' => 'Professional sign for office door.', 'price' => 25.00, 'image' => 'products/office-sign.jpg', 'stock' => 50],
-        ];
-
-        foreach ($products as $product) {
-            DB::table('products')->insert([
-                ...$product,
-                'is_active' => true,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-
-        // Admin User
-        DB::table('users')->insert([
-            'name' => 'Admin',
-            'email' => 'admin@gravir.pro',
-            'phone' => '+359888123456',
-            'is_admin' => true,
-            'password' => bcrypt('admin123'),
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
-
-        // Demo Orders
-        $orders = [
-            ['name' => 'Maria Petrova', 'phone' => '+359888111222', 'address' => '15 Gradinska St, ap. 4', 'city' => 'Sofia', 'payment_method' => 'cash_on_delivery', 'subtotal' => 45.00, 'shipping' => 5.00, 'total' => 50.00, 'status' => 'processing'],
-            ['name' => 'Ivan Georgiev', 'phone' => '+359887333444', 'address' => '78 Vitosha Blvd', 'city' => 'Sofia', 'payment_method' => 'bank_transfer', 'subtotal' => 80.00, 'shipping' => 0.00, 'total' => 80.00, 'status' => 'confirmed'],
-            ['name' => 'Nikoleta Todorova', 'phone' => '+359889555666', 'address' => 'Lyulin 8, bl.123', 'city' => 'Plovdiv', 'payment_method' => 'cash_on_delivery', 'subtotal' => 35.00, 'shipping' => 5.00, 'total' => 40.00, 'status' => 'shipped', 'tracking_number' => 'EONT123456789'],
-        ];
-
-        foreach ($orders as $order) {
-            $orderId = DB::table('orders')->insertGetId([...$order, 'created_at' => now(), 'updated_at' => now()]);
-            DB::table('order_items')->insert([
-                'order_id' => $orderId,
-                'product_id' => rand(1, 5),
-                'quantity' => rand(1, 2),
-                'price' => rand(15, 45),
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
-        }
-    }
-}
-```
-
----
-
 ## Payment Methods
 
-### 1. Cash on Delivery (Наложен платеж)
+### 1. Cash on Delivery
 - Popular in Bulgaria
-- Customer pays to courier on delivery
-- No upfront risk for customer
+- Customer pays to courier
 
-### 2. Bank Transfer (Банков превод)
+### 2. Bank Transfer
 - Account details shown after order
-- Customer transfers manually
-- We ship after confirmation
 
 ### 3. PayPal
-- Link to PayPal.me or PayPal checkout
-- Instant confirmation
-
-```php
-// In Checkout.php
-public $payment_method = 'cash_on_delivery';
-
-public function submit()
-{
-    $this->validate();
-    
-    $order = Order::create([
-        'name' => $this->name,
-        'phone' => $this->phone,
-        'address' => $this->address,
-        'city' => $this->city,
-        'payment_method' => $this->payment_method, // 'bank_transfer', 'cash_on_delivery', 'paypal'
-        'total' => $total,
-        'status' => 'new',
-    ]);
-    
-    return redirect('/thank-you');
-}
-```
+- Link to PayPal.me
 
 ---
 
@@ -400,6 +827,7 @@ class OrderResource extends Resource
                 Tables\Columns\TextColumn::make('phone')->label('Phone'),
                 Tables\Columns\TextColumn::make('city')->label('City'),
                 Tables\Columns\TextColumn::make('total')->label('Total')->money('eur'),
+                Tables\Columns\TextColumn::make('locale')->label('Language'),
                 Tables\Columns\SelectColumn::make('status')
                     ->label('Status')
                     ->options([
@@ -434,75 +862,6 @@ class OrderResource extends Resource
 - Gold: #b8954a
 - Charcoal: #1f1f1f
 
-### Tailwind Classes
-```html
-<div class="bg-charcoal-900 rounded-2xl border border-gold-500/10 hover:border-gold-500/30 transition-all">
-    <img src="/storage/{{ $product->image }}" class="aspect-square object-cover" />
-    <div class="p-6">
-        <h3 class="font-serif text-xl text-white">{{ $product->name }}</h3>
-        <span class="text-gold-500">from €{{ $product->price }}</span>
-    </div>
-</div>
-```
-
----
-
-## Bulgarian Translations (lang/bg)
-
-```php
-// lang/bg/messages.php
-<?php
-
-return [
-    'home' => 'Начало',
-    'products' => 'Продукти',
-    'cart' => 'Кошница',
-    'checkout' => 'Поръчка',
-    'order' => 'Поръчка',
-    'name' => 'Име',
-    'phone' => 'Телефон',
-    'address' => 'Адрес',
-    'city' => 'Град',
-    'total' => 'Общо',
-    'submit' => 'Поръчай',
-    'processing' => 'В обработка',
-    'shipped' => 'Пратен',
-    'delivered' => 'Доставен',
-    'payment_bank_transfer' => 'Банков превод',
-    'payment_cash_on_delivery' => 'Наложен платеж',
-    'payment_paypal' => 'PayPal',
-    'free_shipping' => 'Безплатна доставка',
-    'from' => 'от',
-];
-```
-
-```php
-// lang/en/messages.php
-<?php
-
-return [
-    'home' => 'Home',
-    'products' => 'Products',
-    'cart' => 'Cart',
-    'checkout' => 'Checkout',
-    'order' => 'Order',
-    'name' => 'Name',
-    'phone' => 'Phone',
-    'address' => 'Address',
-    'city' => 'City',
-    'total' => 'Total',
-    'submit' => 'Order',
-    'processing' => 'Processing',
-    'shipped' => 'Shipped',
-    'delivered' => 'Delivered',
-    'payment_bank_transfer' => 'Bank Transfer',
-    'payment_cash_on_delivery' => 'Cash on Delivery',
-    'payment_paypal' => 'PayPal',
-    'free_shipping' => 'Free shipping',
-    'from' => 'from',
-];
-```
-
 ---
 
 ## Commands
@@ -511,14 +870,8 @@ return [
 # Build and run
 docker-compose up -d --build
 
-# The container will auto:
-# - Create SQLite database
-# - Run migrations
-# - Seed data
-# - Start server on port 8000
-
-# Access
-# http://localhost:8000
+# Auto runs: migrations + seeds
+# Access: http://localhost:8000
 # Admin: http://localhost:8000/admin
 # Login: admin@gravir.pro / admin123
 ```
@@ -533,5 +886,4 @@ After first 50 orders, add:
 2. [ ] Customer reviews
 3. [ ] Order tracking
 4. [ ] Econt courier integration
-5. [ ] SEO optimization
-6. [ ] Multi-language (EN, BG)
+5. [ ] SEO per language
